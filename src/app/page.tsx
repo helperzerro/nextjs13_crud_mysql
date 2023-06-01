@@ -1,17 +1,15 @@
+import { PrismaClient } from "@prisma/client";
 import Link from "next/link";
-import Item from "./item";
 
-const getPosts = async () => {
-  const res = await fetch(process.env.BASE_URL + "/api/post", {
-    next: { revalidate: 0 },
-  });
-  const json = await res.json();
-  return json;
+const prisma = new PrismaClient();
+
+const getPostsFromDB = async () => {
+  const posts = await prisma.post.findMany({});
+  return posts;
 };
 
 const Home = async () => {
-  const posts = await getPosts();
-
+  const postsDB = await getPostsFromDB();
   return (
     <div className="w-[1000px] mx-auto pt-20">
       <Link
@@ -21,11 +19,11 @@ const Home = async () => {
         Create
       </Link>
 
-      <div className="flex flex-col mt-8 gap-4">
-        {posts?.posts?.map((post: any, index: number) => (
-          <Item key={index} post={post} />
-        ))}
-      </div>
+      {postsDB?.map((post: any, index: number) => (
+        <div key={index}>
+          <p>{post.title}</p>
+        </div>
+      ))}
     </div>
   );
 };
